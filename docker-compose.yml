@@ -1,0 +1,79 @@
+# docker-compose版本
+version: '2'
+# 服务
+services:
+  redis-master:
+    # restart: always
+    image: redis
+    container_name: redis-master
+    hostname: redis-master
+    ports:
+      - "6379:6379" 
+    command: redis-server /usr/local/etc/redis/redis.conf
+    # network_mode: "bridge"
+    volumes:
+      - /home/lyq/soft/redis/redis-master/data:/data
+      - /home/lyq/soft/redis/redis-master/redis.conf:/usr/local/etc/redis/redis.conf
+
+  redis-slave1:
+    # restart: always
+    image: redis
+    container_name: redis-slave-6380
+    hostname: redis-slave1
+    ports:
+      - "6380:6379" 
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - /home/lyq/soft/redis/redis-slave1/data:/data
+      - /home/lyq/soft/redis/redis-slave1/redis.conf:/usr/local/etc/redis/redis.conf
+    # network_mode: "bridge"
+    links:
+      - redis-master
+
+  redis-slave2:
+    # restart: always
+    image: redis
+    container_name: redis-slave-6381
+    hostname: redis-slave2
+    ports:
+      - "6381:6379" 
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - /home/lyq/soft/redis/redis-slave2/data:/data
+      - /home/lyq/soft/redis/redis-slave2/redis.conf:/usr/local/etc/redis/redis.conf
+    # network_mode: "bridge"
+    links:
+      - redis-master
+
+  sentinel1:
+    image: redis
+    container_name: sentinel-26379
+    ports: 
+      - "26379:26379"
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./sentinels/sentinel-26379.conf:/usr/local/etc/redis/sentinel.conf
+    links:
+      - redis-master
+      
+  sentinel2:
+    image: redis
+    container_name: sentinel-26380
+    ports: 
+      - "26380:26379"
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./sentinels/sentinel-26380.conf:/usr/local/etc/redis/sentinel.conf
+    links:
+      - redis-master
+
+  sentinel3:
+    image: redis
+    container_name: sentinel-26381
+    ports: 
+      - "26381:26379"
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./sentinels/sentinel-26381.conf:/usr/local/etc/redis/sentinel.conf
+    links:
+      - redis-master
